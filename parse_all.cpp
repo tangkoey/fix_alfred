@@ -23,18 +23,12 @@ int main(int argc, char* argv[])
     string mkdir = "mkdir parse_log";
     const char* mkdirx = mkdir.c_str();
     system(mkdirx);
-    cout << "Created directory or directory already exists." << endl;
 
-    string fut = argv[2];
-    string ofn = "parse_log_" + fut + "_failed_parse_log.txt";
-
-    ofstream ofs(ofn.c_str(), ios::app);
+    ofstream ofs("parse_log_" + argv[2] + "_failed_parse_log.txt", ios::app);
 
     for (const auto &file : recursive_directory_iterator(data_folder))
     {	
     	fn = file.path().string();
-        cout << fn << endl;
-        cout << fn << " is a LogFile? " << regex_match(fn, regex("(LogFile)(.*)")) << endl;
         if (regex_match(fn, regex("(LogFile)(.*)")) && stoi(fn.substr(fn.find_first_of("2"), 6)) >= 202203)
         {     
             string cmd = "./parser_two_vm " + fn + " " + argv[2] + " " + inst1 + " " + inst2; 

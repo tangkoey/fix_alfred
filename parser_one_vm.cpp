@@ -31,12 +31,44 @@ struct data_e
     string referenceID;
 };
 
+struct temp4
+{
+    string quantity;
+    string orderID;
+    string priority;
+};
+
 struct ps
 {
     string price;
     string side;
 };
 
+// time_t parse_datetime(string &datestr)
+// {
+//     tm timedata;
+//     timedata.tm_mday = stoi(datestr.substr(6, 2));
+//     timedata.tm_mon = stoi(datestr.substr(4, 2)) - 1;
+//     timedata.tm_year = stoi(datestr.substr(0, 4));
+//     timedata.tm_hour = stoi(datestr.substr(9, 2));
+//     timedata.tm_min = stoi(datestr.substr(11, 2));
+//     timedata.tm_sec = stoi(datestr.substr(13, 2));
+//     return mktime(&timedata);
+// };
+
+// vector<string> split(const string &s, char delim)
+// {
+//     vector<string> result;
+//     stringstream ss(s);
+//     string item;
+
+//     while (getline(ss, item, delim))
+//     {
+//         result.push_back(item);
+//     }
+
+//     return result;
+// };
 
 void string_split_optim(vector<string> &output, const string &s, const char delimiter)
 {
@@ -72,16 +104,13 @@ int main(int argc, char *argv[])
     size_t widx = 0;
     struct gzFile_s *myfile;
 
-    if (argc != 5)
+    if (argc != 3)
     {
-    	cout << "Enter one path with two instruments!" << endl;
         exit(1);
     }
 
-    string fut = argv[2];
+    string raw_file = argv[1];
 
-    int s = 10000000;
-    
     myfile = gzopen(argv[1], "rb");
     if (!myfile)
     {
@@ -95,6 +124,10 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    // string src = "LogFile.txt.20220406-07_41_47_608561728.gz";
+    // string src = "C:/Users/harsh/Desktop/LogFile_ES.txt.20211129-13_07_55_244231112/LogFile_ES.txt";
+
+    int s = 10000000;
     string data;
     vector<string> lines;
 
@@ -120,22 +153,13 @@ int main(int argc, char *argv[])
     int no_blocks = 0;
     size_t len5799 = 0;
     string f4 = "0";
-    
-    string wi1 = argv[3];
-    string wi2 = argv[4];
-    
-    size_t dps;
-    string 
-    dps = raw_file.find_first_of("2");
 
-    string sfn_1 = "parsed_" + fut + "/" + fut + "_orders_" + raw_file.substr(dps, 27) + wi1 + ".txt";
-    string sfn_2 = "parsed_" + fut + "/" + fut + "_orders_" + raw_file.substr(dps, 27) + wi2 + ".txt";
+    string wi = argv[2];
+    ofstream savefile;
+    savefile.open(wi + "_orders_" + raw_file.substr(12, 27) + ".txt", ios::app);
 
-    ofstream savefile1;
-    savefile1.open(sfn_1.c_str(), ios::app);
-
-    ofstream savefile2;
-    savefile2.open(sfn_2.c_str(), ios::app);
+    // size_t len_inst = wanted_inst.length();
+    // size_t first_48 = 0;
 
     vector<vector<string>> md{};
     vector<vector<string>> order{};
@@ -229,35 +253,19 @@ int main(int argc, char *argv[])
 
                     for (int i = 0; i < md.size(); i++)
                     {
-                        if (md[i][0] == wi1)
+                        if (md[i][0] == wi)
                         {
                             for (int j = 0; j < 9; j++)
                             {
-                                savefile1 << md[i][j];
+                                savefile << md[i][j];
                                 // create csv format manually
                                 if (j < 8)
                                 {
-                                    savefile1 << ",";
+                                    savefile << ",";
                                 }
                                 else
                                 {
-                                    savefile1 << "\n";
-                                }
-                            }
-                        }
-                        else if (md[i][0] == wi2)
-                        {
-                            for (int j = 0; j < 9; j++)
-                            {
-                                savefile2 << md[i][j];
-                                // create csv format manually
-                                if (j < 8)
-                                {
-                                    savefile2 << ",";
-                                }
-                                else
-                                {
-                                    savefile2 << "\n";
+                                    savefile << "\n";
                                 }
                             }
                         }
@@ -343,51 +351,27 @@ int main(int argc, char *argv[])
                     // only 10 field needed for further analysis
                     for (int i = 0; i < num_order; i++)
                     {
-                        if (md[i][0] == wi1)
+                        if (md[i][0] == wi)
                         {
                             for (int j = 0; j < 9; j++)
                             {
                                 switch (j)
                                 {
                                 case 3: // price; md[i][10] = referenceID
-                                    savefile1 << order[stoi(md[i][9]) - 1][0];
+                                    savefile << order[stoi(md[i][9]) - 1][0];
                                 case 6: // side
-                                    savefile1 << order[stoi(md[i][9]) - 1][1];
+                                    savefile << order[stoi(md[i][9]) - 1][1];
                                 default:
-                                    savefile1 << md[i][j];
+                                    savefile << md[i][j];
                                 }
                                 // create csv format manually
                                 if (j < 8)
                                 {
-                                    savefile1 << ",";
+                                    savefile << ",";
                                 }
                                 else
                                 {
-                                    savefile1 << "\n";
-                                }
-                            }
-                        }
-                        else if (md[i][0] == wi2)
-                        {
-                            for (int j = 0; j < 9; j++)
-                            {
-                                switch (j)
-                                {
-                                case 3: // price; md[i][10] = referenceID
-                                    savefile2 << order[stoi(md[i][9]) - 1][0];
-                                case 6: // side
-                                    savefile2 << order[stoi(md[i][9]) - 1][1];
-                                default:
-                                    savefile2 << md[i][j];
-                                }
-                                // create csv format manually
-                                if (j < 8)
-                                {
-                                    savefile2 << ",";
-                                }
-                                else
-                                {
-                                    savefile2 << "\n";
+                                    savefile << "\n";
                                 }
                             }
                         }
@@ -466,69 +450,36 @@ int main(int argc, char *argv[])
 
                     for (int i = 0; i < md.size(); i++)
                     {
-                        if (md[i][0] == wi1)
+                        if (md[i][0] == wi)
                         {
                             for (int j = 0; j < 9; j++)
                             {
                                 switch (j)
                                 {
                                 case 1:
-                                    savefile1 << data_x.time;
+                                    savefile << data_x.time;
                                     break;
                                 case 2:
-                                    savefile1 << data_x.orderID;
+                                    savefile << data_x.orderID;
                                     break;
                                 case 4:
-                                    savefile1 << data_x.quantity;
+                                    savefile << data_x.quantity;
                                     break;
                                 case 7:
-                                    savefile1 << data_x.priority;
+                                    savefile << data_x.priority;
                                     break;
                                 default:
-                                    savefile1 << md[i][j];
+                                    savefile << md[i][j];
                                     break;
                                 }
                                 // create csv format manually
                                 if (j < 8)
                                 {
-                                    savefile1 << ",";
+                                    savefile << ",";
                                 }
                                 else
                                 {
-                                    savefile1 << "\n";
-                                }
-                            }
-                        }
-                        else if (md[i][0] == wi2)
-                        {
-                            for (int j = 0; j < 9; j++)
-                            {
-                                switch (j)
-                                {
-                                case 1:
-                                    savefile2 << data_x.time;
-                                    break;
-                                case 2:
-                                    savefile2 << data_x.orderID;
-                                    break;
-                                case 4:
-                                    savefile2 << data_x.quantity;
-                                    break;
-                                case 7:
-                                    savefile2 << data_x.priority;
-                                    break;
-                                default:
-                                    savefile2 << md[i][j];
-                                    break;
-                                }
-                                // create csv format manually
-                                if (j < 8)
-                                {
-                                    savefile2 << ",";
-                                }
-                                else
-                                {
-                                    savefile2 << "\n";
+                                    savefile << "\n";
                                 }
                             }
                         }
@@ -601,33 +552,18 @@ int main(int argc, char *argv[])
 
                     for (int i = 0; i < num_order; i++)
                     {
-                        if (md[i][0] == wi1)
+                        if (md[i][0] == wi)
                         {
                             for (int j = 0; j < 9; j++)
                             {
-                                savefile1 << md[i][j];
+                                savefile << md[i][j];
                                 if (j < 8)
                                 {
-                                    savefile1 << ",";
+                                    savefile << ",";
                                 }
                                 else
                                 {
-                                    savefile1 << "\n";
-                                }
-                            }
-                        }
-                        else if (md[i][0] == wi2)
-                        {
-                            for (int j = 0; j < 9; j++)
-                            {
-                                savefile2 << md[i][j];
-                                if (j < 8)
-                                {
-                                    savefile2 << ",";
-                                }
-                                else
-                                {
-                                    savefile2 << "\n";
+                                    savefile << "\n";
                                 }
                             }
                         }
@@ -640,15 +576,13 @@ int main(int argc, char *argv[])
                 if (counter % 10000 == 0)
                 {
                     cout << "Handled " << counter << " rows so far." << endl;
-                    savefile1.flush();
-                    savefile2.flush();
+                    savefile.flush();
                 }
             }
         }
     }
 
-    savefile1.close();
-    savefile2.close();
+    savefile.close();
     clkFinish = clock();
     std::cout << "Parsing loop finished in: " << (clkFinish - clkStart) / 1000000.00 << "seconds." << endl;
 
