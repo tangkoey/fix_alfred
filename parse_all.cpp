@@ -24,7 +24,9 @@ int main(int argc, char* argv[])
     const char* mkdirx = mkdir.c_str();
     system(mkdirx);
 
-    ofstream ofs("parse_log_" + argv[2] + "_failed_parse_log.txt", ios::app);
+    string fut = argv[2];
+    string ofn = "parse_log_" + fut + "_failed_parse_log.txt";
+    ofstream ofs(ofn.c_str(), ios::app);
 
     for (const auto &file : recursive_directory_iterator(data_folder))
     {	
